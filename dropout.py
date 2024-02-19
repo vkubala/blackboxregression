@@ -37,6 +37,9 @@ def evaluate_dropout_probability_on_split(
     return np.mean(evaluations_by_replicate)
 
 
+# TODO: Verify that this is generating the final model correctly.
+#   In particular, should it use the combined dataset with all
+#   M replicates?
 def train_model_with_dropout(
         dropout_prob: float,
         learning_alg: LearningAlg,
