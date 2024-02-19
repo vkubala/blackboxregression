@@ -23,8 +23,6 @@ def evaluate_dropout_probability_on_split(
     mc_replicates = reg_context.M
     evaluations_by_replicate = np.zeros(mc_replicates)
     for r in range(mc_replicates):
-        # This is a matrix whose component (i, j) is the proposition that
-        #   entry (i, j) of X should be dropped (i.e., set to 0)
         predictor_with_dropout = train_model_with_dropout(
             dropout_prob=dropout_prob,
             learning_alg=reg_context.learning_alg,
