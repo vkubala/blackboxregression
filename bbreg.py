@@ -35,7 +35,6 @@ def black_box_regress(
         c=c,
     )
 
-    # Handle each 
     if regularization_method == RegularizationMethod.Dropout:
         optimal_dropout_probability = _gridsearch_over_parameters(
             # TODO: reevaluate this space of possibilities.
