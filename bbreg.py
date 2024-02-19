@@ -18,7 +18,7 @@ def black_box_regress(
         M: t.Optional[int] = None,
         c: t.Optional[npt.ArrayLike] = None,
 ) -> Predictor:
-    """We're going to need a large docstring here,
+    """TODO: We're going to need a large docstring here,
     in the proper format so that it can be converted automatically
     to Python documentation."""
     X_array = np.asarray(X)
