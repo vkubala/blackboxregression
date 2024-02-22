@@ -6,6 +6,7 @@ from sklearn import model_selection
 
 from common import LearningAlg, RegularizationMethod, EvalCriterion, Predictor, RegContext
 import dropout
+import robust
 
 
 def black_box_regress(
@@ -46,6 +47,20 @@ def black_box_regress(
         )
         return dropout.train_model_with_dropout(
             dropout_prob=optimal_dropout_probability,
+            learning_alg=learning_alg,
+            X=X,
+            Y=Y,
+        )
+    elif regularization_method == RegularizationMethod.Robust:
+        optimal_perturbation_matrix = _gridsearch_over_parameters(
+            parameter_settings=robust.generate_candidate_perturbations(),
+            evaluate_on_split=robust.evaluate_perturbation_matrix_on_split,
+            X=X,
+            Y=Y,
+            reg_context=context,
+        )
+        return robust.train_model_with_robust(
+            perturbation_matrix=optimal_perturbation_matrix,
             learning_alg=learning_alg,
             X=X,
             Y=Y,
