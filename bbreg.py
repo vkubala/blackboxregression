@@ -7,6 +7,7 @@ from sklearn import model_selection
 from common import LearningAlg, RegularizationMethod, EvalCriterion, Predictor, RegContext
 from noise_addition import Distribution
 import dropout
+import noise_addition
 import robust
 
 
@@ -53,12 +54,11 @@ def black_box_regress(
             Y=Y,
         )
     elif regularization_method == RegularizationMethod.NoiseAddition :
-        # standard deviation range
-        parameter_range = np.linspace(0.01, 3, 49) 
+        std_range = np.linspace(0.01, 3, 49) 
         # Generating parameter permutations to test, explicitly adding (normal, 0) to also test no regularization
         parameter_settings = [(Distribution.normal, 0)] + [
-            (distribution, value) for distribution in Distribution
-            for value in parameter_range
+            (distribution, std) for distribution in Distribution
+            for std in std_range
         ]
         optimal_params = _gridsearch_over_parameters(
             # TODO: reevaluate this space of possibilities. 
