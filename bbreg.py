@@ -51,6 +51,23 @@ def black_box_regress(
             X=X,
             Y=Y,
         )
+    elif regularization_method == RegularizationMethod.NoiseAddition :
+        optimal_standard_deviation = _gridsearch_over_parameters(
+            # TODO: reevaluate this space of possibilities. 
+            # Maybe add several distributions that are parameterized by mean and sd.
+            parameter_settings=np.linspace(0, 3, 50),
+            evaluate_on_split=noise_addition.evaluate_noise_sd_on_split,
+            X=X,
+            Y=Y,
+            reg_context=context,
+        )
+        return noise_addition.train_model_with_noise(
+            standard_deviation=optimal_standard_deviation,
+            learning_alg=learning_alg,
+            X=X,
+            Y=Y,
+            mc_replicates = reg_context.M,
+        )
     elif regularization_method == RegularizationMethod.Robust:
         optimal_perturbation_matrix = _gridsearch_over_parameters(
             parameter_settings=robust.generate_candidate_perturbations(),
