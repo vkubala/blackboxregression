@@ -75,7 +75,7 @@ def black_box_regress(
             learning_alg=learning_alg,
             X=X,
             Y=Y,
-            mc_replicates = reg_context.M,
+            mc_replicates=context.M,
         )
     elif regularization_method == RegularizationMethod.Robust:
         optimal_perturbation_matrix = _gridsearch_over_parameters(
