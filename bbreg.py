@@ -5,6 +5,7 @@ import numpy.typing as npt
 from sklearn import model_selection
 
 from common import LearningAlg, RegularizationMethod, EvalCriterion, Predictor, RegContext
+from noise_addition import Distribution
 import dropout
 import robust
 
@@ -52,17 +53,25 @@ def black_box_regress(
             Y=Y,
         )
     elif regularization_method == RegularizationMethod.NoiseAddition :
-        optimal_standard_deviation = _gridsearch_over_parameters(
+        # standard deviation range
+        parameter_range = np.linspace(0.01, 3, 49) 
+        # Generating parameter permutations to test, explicitly adding (normal, 0) to also test no regularization
+        parameter_settings = [(Distribution.normal, 0)] + [
+            (distribution, value) for distribution in Distribution
+            for value in parameter_range
+        ]
+        optimal_params = _gridsearch_over_parameters(
             # TODO: reevaluate this space of possibilities. 
-            # Maybe add several distributions that are parameterized by mean and sd.
-            parameter_settings=np.linspace(0, 3, 50),
+            # Example range of standard deviations and several symmetric distributions
+            parameter_settings = parameter_settings,       
             evaluate_on_split=noise_addition.evaluate_noise_sd_on_split,
             X=X,
             Y=Y,
             reg_context=context,
         )
         return noise_addition.train_model_with_noise(
-            standard_deviation=optimal_standard_deviation,
+            standard_deviation=optimal_params[1],
+            distribution = optimal_params[0], 
             learning_alg=learning_alg,
             X=X,
             Y=Y,
