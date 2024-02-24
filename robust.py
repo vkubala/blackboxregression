@@ -44,7 +44,7 @@ def train_model_with_robust(
     # compute the maximum loss across perturbation matrices for each model.
     maximum_loss_by_model = [
         max(
-            reg_context.eval_criterion(
+            EVAL_FUNCTIONS[reg_context.eval_criterion](
                 yhat=model(X + delta),
                 y=Y,
             )
