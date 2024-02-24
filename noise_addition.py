@@ -5,7 +5,7 @@ import typing as t
 import numpy as np
 import numpy.typing as npt
 
-from common import RegContext, EVAL_FUNCTIONS, LearningAlg, Predictor
+from common import RegContext, EVAL_FUNCTIONS, Predictor
 
 
 class Distribution(str, enum.Enum):
@@ -31,10 +31,9 @@ def evaluate_noise_sd_on_split(
     predictor_with_noise = train_model_with_noise(
         standard_deviation=standard_deviation,
         distribution = distribution,
-        learning_alg=reg_context.learning_alg,
         X=X_train,
         Y=Y_train,
-        mc_replicates=reg_context.M,      
+        reg_context=reg_context,    
     )
     Y_hat_test = predictor_with_noise(X_test)
     loss_value = EVAL_FUNCTIONS[reg_context.eval_criterion](
@@ -47,15 +46,14 @@ def evaluate_noise_sd_on_split(
 def train_model_with_noise(
         standard_deviation: float,
         distribution: Distribution, 
-        learning_alg: LearningAlg,
         X: npt.NDArray,
         Y: npt.NDArray,
-        mc_replicates: int
+        reg_context: RegContext,
 ) -> Predictor:
     # Create lists of `mc_replicates` noised datasets 
     X_train_all = []
     Y_train_all = []
-    for _ in range(mc_replicates):              
+    for _ in range(reg_context.M):              
         noise = generate_noise(distribution, standard_deviation, X_train_noise.shape)   
         X_train_noise = X + noise
         X_train_all.append(X_train_noise)
@@ -65,7 +63,7 @@ def train_model_with_noise(
     X_train_full = np.concatenate(X_train_all, axis=0)
     Y_train_full = np.concatenate(Y_train_all, axis=0)
     
-    return learning_alg(X_train_full, Y_train_full)
+    return reg_context.learning_alg(X_train_full, Y_train_full)
 
 
 def generate_noise(distribution, standard_deviation, size):

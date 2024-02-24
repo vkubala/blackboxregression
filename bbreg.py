@@ -49,9 +49,9 @@ def black_box_regress(
         )
         return dropout.train_model_with_dropout(
             dropout_prob=optimal_dropout_probability,
-            learning_alg=learning_alg,
             X=X,
             Y=Y,
+            reg_context=context,
         )
     elif regularization_method == RegularizationMethod.NoiseAddition :
         std_range = np.linspace(0.01, 3, 49) 
@@ -71,15 +71,13 @@ def black_box_regress(
         return noise_addition.train_model_with_noise(
             standard_deviation=optimal_std,
             distribution=optimal_distrib, 
-            learning_alg=learning_alg,
             X=X,
             Y=Y,
-            mc_replicates=context.M,
+            reg_context=context,
         )
     elif regularization_method == RegularizationMethod.Robust:
         optimal_c = _gridsearch_over_parameters(
-            # TODO: Determine the search space for c.
-            parameter_settings=[np.zeros(X.shape[1])],
+            parameter_settings=robust.generate_c_searchspace(c),
             evaluate_on_split=robust.evaluate_c_on_split,
             X=X,
             Y=Y,
