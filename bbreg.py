@@ -55,23 +55,22 @@ def black_box_regress(
         )
     elif regularization_method == RegularizationMethod.NoiseAddition :
         std_range = np.linspace(0.01, 3, 49) 
-        # Generating parameter permutations to test, explicitly adding (normal, 0) to also test no regularization
+        # Generating parameter permutations to test, 
+        #   explicitly adding (normal, 0) to also test no regularization
         parameter_settings = [(Distribution.normal, 0)] + [
             (distribution, std) for distribution in Distribution
             for std in std_range
         ]
-        optimal_params = _gridsearch_over_parameters(
-            # TODO: reevaluate this space of possibilities. 
-            # Example range of standard deviations and several symmetric distributions
-            parameter_settings = parameter_settings,       
+        optimal_distrib, optimal_std = _gridsearch_over_parameters(
+            parameter_settings=parameter_settings,       
             evaluate_on_split=noise_addition.evaluate_noise_sd_on_split,
             X=X,
             Y=Y,
             reg_context=context,
         )
         return noise_addition.train_model_with_noise(
-            standard_deviation=optimal_params[1],
-            distribution = optimal_params[0], 
+            standard_deviation=optimal_std,
+            distribution=optimal_distrib, 
             learning_alg=learning_alg,
             X=X,
             Y=Y,
@@ -93,7 +92,7 @@ def black_box_regress(
             reg_context=context,
         )
     else:
-        raise TypeError("{method} is not yet supported.".format(method=str(regularization_method)))
+        raise TypeError("{method} is not supported.".format(method=str(regularization_method)))
 
 
 def _validate_inputs(
