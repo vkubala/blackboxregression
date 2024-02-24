@@ -80,7 +80,7 @@ def black_box_regress(
     elif regularization_method == RegularizationMethod.Robust:
         optimal_c = _gridsearch_over_parameters(
             # TODO: Determine the search space for c.
-            parameter_settings=[np.zeros(len(X[1]))],
+            parameter_settings=[np.zeros(X.shape[1])],
             evaluate_on_split=robust.evaluate_c_on_split,
             X=X,
             Y=Y,
