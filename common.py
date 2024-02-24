@@ -6,7 +6,7 @@ import numpy as np
 import numpy.typing as npt
 
 
-Predictor = t.Callable[[npt.ArrayLike], float]
+Predictor = t.Callable[[npt.ArrayLike], npt.ArrayLike]
 
 
 LearningAlg = t.Callable[[
