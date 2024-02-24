@@ -78,7 +78,8 @@ def train_model_with_noise(
 
 def generate_noise(distribution, standard_deviation, size):
     """
-    Generates iid noise with mean 0 from 'normal', 'logistic', or 'laplace' distribution specified by standard deviation and size (n, d), where n is samples and d is features.
+    Generates iid noise with mean 0 from 'normal', 'logistic', or 'laplace' distribution
+    specified by standard deviation and size (n, d), where n is samples and d is features.
 
     Returns: numpy.ndarray of noise values.
     """
