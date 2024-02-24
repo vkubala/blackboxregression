@@ -32,7 +32,7 @@ def train_model_with_dropout(
         Y: npt.NDArray,
         reg_context: RegContext,
 ) -> Predictor:
-    assert dropout_prob > 0
+    assert dropout_prob >= 0
     assert dropout_prob < 1
     # Create lists of `mc_replicates` datasets with dropout
     X_train_all = []
