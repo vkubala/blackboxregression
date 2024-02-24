@@ -125,7 +125,7 @@ def _validate_inputs(
             "the vector of column bounds `c` is a required input.")
     
 
-ParamSetting = t.Hashable
+ParamSetting = t.TypeVar("ParamSetting")
 def _gridsearch_over_parameters(
         parameter_settings: t.List[ParamSetting],
         evaluate_on_split: t.Callable[[
@@ -147,15 +147,15 @@ def _gridsearch_over_parameters(
     This is general enough to be used for any regularization method and could, without
     too much additional work, be swapped for a different optimization technique."""
     kf = model_selection.KFold(reg_context.K)
-    loss_by_fold_by_param: t.Dict[ParamSetting, npt.NDArray] = {
-        param_setting: np.zeros(reg_context.K)
-        for param_setting in parameter_settings
-    }
+    loss_by_fold_by_param_index: t.List[npt.NDArray] = [
+        np.zeros(reg_context.K)
+        for _ in parameter_settings
+    ]
     for fold_number, (train_indices, test_indices) in enumerate(kf.split(X)):
         X_train, X_test = X[train_indices], X[test_indices]
         Y_train, Y_test = Y[train_indices], Y[test_indices]
-        for param_setting in parameter_settings:
-            loss_by_fold_by_param[param_setting][fold_number] = evaluate_on_split(
+        for param_index, param_setting in enumerate(parameter_settings):
+            loss_by_fold_by_param_index[param_index][fold_number] = evaluate_on_split(
                 param_setting,
                 X_train,
                 X_test,
@@ -163,8 +163,10 @@ def _gridsearch_over_parameters(
                 Y_test,
                 reg_context,
             )
-    mean_loss_by_param = {
-        param_setting: np.mean(loss_by_fold)
-        for param_setting, loss_by_fold in loss_by_fold_by_param.items()
-    }
-    return min(parameter_settings, key=mean_loss_by_param.__getitem__)
+    mean_loss_by_param_index = [
+        np.mean(loss_by_fold)
+        for loss_by_fold in loss_by_fold_by_param_index
+    ]
+    return parameter_settings[
+        min(range(len(parameter_settings)), key=mean_loss_by_param_index.__getitem__)
+    ]
