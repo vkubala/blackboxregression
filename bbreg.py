@@ -78,18 +78,19 @@ def black_box_regress(
             mc_replicates=context.M,
         )
     elif regularization_method == RegularizationMethod.Robust:
-        optimal_perturbation_matrix = _gridsearch_over_parameters(
-            parameter_settings=robust.generate_candidate_perturbations(),
-            evaluate_on_split=robust.evaluate_perturbation_matrix_on_split,
+        optimal_c = _gridsearch_over_parameters(
+            # TODO: Determine the search space for c.
+            parameter_settings=[np.zeros(len(X[1]))],
+            evaluate_on_split=robust.evaluate_c_on_split,
             X=X,
             Y=Y,
             reg_context=context,
         )
         return robust.train_model_with_robust(
-            perturbation_matrix=optimal_perturbation_matrix,
-            learning_alg=learning_alg,
+            c=optimal_c,
             X=X,
             Y=Y,
+            reg_context=context,
         )
     else:
         raise TypeError("{method} is not yet supported.".format(method=str(regularization_method)))
