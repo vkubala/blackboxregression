@@ -26,7 +26,6 @@ def evaluate_dropout_probability_on_split(
     )
 
 
-
 def train_model_with_dropout(
         dropout_prob: float,
         X: npt.NDArray,

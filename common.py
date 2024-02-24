@@ -31,24 +31,29 @@ class EvalCriterion(str, enum.Enum):
     MSE = 'MSE'
 
 
-@dataclasses.dataclass(frozen=True)
-class RegContext:
-    learning_alg: LearningAlg
-    regularization_method: RegularizationMethod
-    eval_criterion: EvalCriterion
-    K: int
-    M: t.Optional[int]
-    c: t.Optional[npt.ArrayLike]
-
-
 def mad(yhat: npt.NDArray, y: npt.NDArray) -> float:
     return np.mean(np.abs(y - yhat))
+
 
 def mse(yhat: npt.NDArray, y: npt.NDArray) -> float:
     residuals = y - yhat
     return np.mean(residuals@residuals)
 
+
 EVAL_FUNCTIONS = {
     EvalCriterion.MAD: mad,
     EvalCriterion.MSE: mse,
 }
+
+
+@dataclasses.dataclass(frozen=True)
+class RegContext:
+    learning_alg: LearningAlg
+    regularization_method: RegularizationMethod
+    eval_criterion: EvalCriterion
+    # number of CV folds
+    K: int
+    # number of MC replicates
+    M: t.Optional[int]
+    # column bounds for robust
+    c: t.Optional[npt.ArrayLike]
