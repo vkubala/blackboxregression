@@ -20,6 +20,7 @@ def black_box_regress(
         K: int,
         M: t.Optional[int] = None,
         c: t.Optional[npt.ArrayLike] = None,
+        verbose: bool = False,
 ) -> Predictor:
     """TODO: We're going to need a large docstring here,
     in the proper format so that it can be converted automatically
@@ -47,6 +48,8 @@ def black_box_regress(
             Y=Y,
             reg_context=context,
         )
+        if verbose:
+            print("Optimal Dropout Probability:", optimal_dropout_probability)
         return dropout.train_model_with_dropout(
             dropout_prob=optimal_dropout_probability,
             learning_alg=learning_alg,
@@ -68,6 +71,8 @@ def black_box_regress(
             Y=Y,
             reg_context=context,
         )
+        if verbose:
+            print("Optimal Distribution:", optimal_distrib, "Optimal Standard Deviation:", optimal_std)
         return noise_addition.train_model_with_noise(
             standard_deviation=optimal_std,
             distribution=optimal_distrib, 
@@ -85,6 +90,8 @@ def black_box_regress(
             Y=Y,
             reg_context=context,
         )
+        if verbose:
+            print("Optimal c for Robust Regularization:", optimal_c)
         return robust.train_model_with_robust(
             c=optimal_c,
             X=X,
