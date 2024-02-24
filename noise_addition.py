@@ -52,28 +52,20 @@ def train_model_with_noise(
         Y: npt.NDArray,
         mc_replicates: int
 ) -> Predictor:
-    # entry (i, j) of X has noise added from a specified distribution with sd:
-    # standard_deviation
-    
+    # Create lists of `mc_replicates` noised datasets 
     X_train_all = []
     Y_train_all = []
-    for _ in range(mc_replicates):      
-        X_train_noise = X.copy()
-        
-
+    for _ in range(mc_replicates):              
         noise = generate_noise(distribution, standard_deviation, X_train_noise.shape)   
-        
-        X_train_noise += noise 
-        
-        # Create concatenated dataset of M monte carlo noise replicates    
+        X_train_noise = X + noise
         X_train_all.append(X_train_noise)
         Y_train_all.append(Y)     
 
     # Concatenate to form a single large training dataset and label set
-    X_train_noised = np.concatenate(X_train_all, axis=0)
+    X_train_full = np.concatenate(X_train_all, axis=0)
     Y_train_full = np.concatenate(Y_train_all, axis=0)
     
-    return learning_alg(X_train_noised, Y_train_full)
+    return learning_alg(X_train_full, Y_train_full)
 
 
 def generate_noise(distribution, standard_deviation, size):
