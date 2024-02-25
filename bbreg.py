@@ -28,7 +28,9 @@ def black_box_regress(
     X_array = np.asarray(X)
     Y_array = np.asarray(Y)
     _validate_inputs(X_array, Y_array, regularization_method, M, c)
-
+    
+    normalizing_vector = np.linalg.norm(X_array, axis=0)
+    X_array /= normalizing_vector
     context = RegContext(
         learning_alg=learning_alg,
         regularization_method=regularization_method,
@@ -48,7 +50,7 @@ def black_box_regress(
         )
         if verbose:
             print("Optimal Dropout Probability:", optimal_dropout_probability)
-        return dropout.train_model_with_dropout(
+        optimal_model: Predictor = dropout.train_model_with_dropout(
             dropout_prob=optimal_dropout_probability,
             X=X_array,
             Y=Y_array,
@@ -71,7 +73,7 @@ def black_box_regress(
         )
         if verbose:
             print("Optimal Distribution:", optimal_distrib, "Optimal Standard Deviation:", optimal_std)
-        return noise_addition.train_model_with_noise(
+        optimal_model: Predictor =  noise_addition.train_model_with_noise(
             standard_deviation=optimal_std,
             distribution=optimal_distrib, 
             X=X_array,
@@ -88,7 +90,7 @@ def black_box_regress(
         )
         if verbose:
             print("Optimal c for Robust Regularization:", optimal_c)
-        return robust.train_model_with_robust(
+        optimal_model: Predictor =  robust.train_model_with_robust(
             c=optimal_c,
             X=X_array,
             Y=Y_array,
@@ -96,6 +98,13 @@ def black_box_regress(
         )
     else:
         raise TypeError("{method} is not supported.".format(method=str(regularization_method)))
+
+    # The `optimal_model` computed above expects to take in data that
+    #   are normalized. To give the user good performance without needing to
+    #   do the normalization theirself, embed the normalization into the model we give them.
+    def optimal_model_wrapped_with_normalization(X: npt.NDArray) -> npt.NDArray:
+        return optimal_model(X / normalizing_vector)
+    return optimal_model_wrapped_with_normalization
 
 
 def _validate_inputs(

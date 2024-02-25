@@ -41,7 +41,8 @@ def train_model_with_dropout(
         # This is a matrix whose component (i, j) is the proposition that
         #   entry (i, j) of X should be dropped (i.e., set to 0)
         dropout_mask = np.random.random(X.shape) < dropout_prob
-        X_with_dropout = (dropout_mask * X) / (1 - dropout_prob)
+        # X_with_dropout = (dropout_mask * X) / (1 - dropout_prob)
+        X_with_dropout = dropout_mask * X
         X_train_all.append(X_with_dropout)
         Y_train_all.append(Y)
     
