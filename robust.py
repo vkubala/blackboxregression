@@ -62,16 +62,18 @@ def train_model_with_robust(
     return models[min(range(len(models)), key=maximum_loss_by_model.__getitem__)]
     
 
-def generate_perturbation_matrices(
+def generate_candidate_perturbations(
     X_train: npt.NDArray,
     c: npt.ArrayLike,
-    num_to_generate: int=100,
+    num: int = 100
 ) -> t.List[npt.NDArray]:
     perturbation_matrices = []
-    
+
+    if np.linalg.norm(c) == 0:
+      num=1
     # First half of perturbation matrices add evenly distributed noise
     #  Generate N(0,5) iid RV's
-    num_first_set = int(np.ceil(0.5 * num_to_generate))
+    num_first_set = int(np.ceil(0.5 * num))
     for _ in range(num_first_set):
         perturbation_matrix = np.zeros_like(X_train)
         
@@ -89,38 +91,41 @@ def generate_perturbation_matrices(
     #  Generate N(0,10) iid RV's for few randomly selected rows 
     num_nonzero = int(np.ceil(0.05 * X_train.shape[0]))
     
-    num_second_set = num_to_generate - num_first_set
-    for _ in range(num_second_set):
-        perturbation_matrix = np.zeros_like(X_train)
-        
-        for j in range(X_train.shape[1]):
-            perturbation = np.zeros(X_train.shape[0])
-            
-            #  Randomly select outlier rows.
-            nonzero_indices = np.random.choice(X_train.shape[0], num_nonzero, replace=False)
-            perturbation[nonzero_indices] = np.random.normal(0, 10, num_nonzero)
-            norm = np.linalg.norm(perturbation)
-            
-            #  Normalization to satisfy <c_j ineq. column-wise.
-            if norm > c[j]:
-                perturbation *= c[j] / norm
-            perturbation_matrix[:, j] = perturbation
-        perturbation_matrices.append(perturbation_matrix)
+    if np.linalg.norm(c) != 0:
+      num_second_set = num - num_first_set
+      for _ in range(num_second_set):
+          perturbation_matrix = np.zeros_like(X_train)
+          
+          for j in range(X_train.shape[1]):
+              perturbation = np.zeros(X_train.shape[0])
+              
+              #  Randomly select outlier rows.
+              nonzero_indices = np.random.choice(X_train.shape[0], num_nonzero, replace=False)
+              perturbation[nonzero_indices] = np.random.normal(0, 10, num_nonzero)
+              norm = np.linalg.norm(perturbation)
+              
+              #  Normalization to satisfy <c_j ineq. column-wise.
+              if norm > c[j]:
+                  perturbation *= c[j] / norm
+              perturbation_matrix[:, j] = perturbation
+          perturbation_matrices.append(perturbation_matrix)
     
     return perturbation_matrices
 
 
+
+
 def generate_c_searchspace(
+    X_train: npt.NDArray,
     c: npt.ArrayLike,
-    grid_size_max: int = 50,
+    grid_size_max: int = 50
 ) -> t.List[npt.NDArray]:
-    """Generate the set of column bound vectors over which to perform CV."""
     
     # Sum of non-negative regularization terms in input c
     c_l1 = np.sum(c)  
     
-    # Column dimension (number of variables) in training data
-    p = len(c)
+    # Column dimension (number of variables) in X_train
+    p = X_train.shape[1]
 
     # Number of search points each variable gets within bounds c_i
     #  Proportional to the relative size of the bounds
@@ -159,5 +164,6 @@ def generate_c_searchspace(
         for _ in range(gridsize):
             vector = [random.choice(points) for points in search_points]
             c_vectors.append(vector)
-
+            
+    c_vectors.append(np.zeros(p))
     return c_vectors
