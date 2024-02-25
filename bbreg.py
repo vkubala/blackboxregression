@@ -79,7 +79,8 @@ def black_box_regress(
             reg_context=context,
         )
     elif regularization_method == RegularizationMethod.NoiseAddition :
-        std_range = np.linspace(0.01, 3, 49) 
+        #generate std range based on length of matrix because of euclidean scaling
+        std_range = np.linspace(1e-11, 3/np.sqrt(len(Y)), 50)
         # Generate parameter permutations to test, 
         #   explicitly adding (normal, 0) to also test no regularization
         parameter_settings = [(Distribution.normal, 0)] + [
