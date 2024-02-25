@@ -28,7 +28,6 @@ def black_box_regress(
     X_array = np.asarray(X)
     Y_array = np.asarray(Y)
     _validate_inputs(X_array, Y_array, regularization_method, M, c)
-    # TODO: center and rescale inputs.
 
     context = RegContext(
         learning_alg=learning_alg,
@@ -41,24 +40,23 @@ def black_box_regress(
 
     if regularization_method == RegularizationMethod.Dropout:
         optimal_dropout_probability = _gridsearch_over_parameters(
-            # TODO: reevaluate this space of possibilities.
             parameter_settings=np.linspace(0, 0.5, 30),
             evaluate_on_split=dropout.evaluate_dropout_probability_on_split,
-            X=X,
-            Y=Y,
+            X=X_array,
+            Y=Y_array,
             reg_context=context,
         )
         if verbose:
             print("Optimal Dropout Probability:", optimal_dropout_probability)
         return dropout.train_model_with_dropout(
             dropout_prob=optimal_dropout_probability,
-            X=X,
-            Y=Y,
+            X=X_array,
+            Y=Y_array,
             reg_context=context,
         )
     elif regularization_method == RegularizationMethod.NoiseAddition :
         std_range = np.linspace(0.01, 3, 49) 
-        # Generating parameter permutations to test, 
+        # Generate parameter permutations to test, 
         #   explicitly adding (normal, 0) to also test no regularization
         parameter_settings = [(Distribution.normal, 0)] + [
             (distribution, std) for distribution in Distribution
@@ -67,8 +65,8 @@ def black_box_regress(
         optimal_distrib, optimal_std = _gridsearch_over_parameters(
             parameter_settings=parameter_settings,       
             evaluate_on_split=noise_addition.evaluate_noise_sd_on_split,
-            X=X,
-            Y=Y,
+            X=X_array,
+            Y=Y_array,
             reg_context=context,
         )
         if verbose:
@@ -76,24 +74,24 @@ def black_box_regress(
         return noise_addition.train_model_with_noise(
             standard_deviation=optimal_std,
             distribution=optimal_distrib, 
-            X=X,
-            Y=Y,
+            X=X_array,
+            Y=Y_array,
             reg_context=context,
         )
     elif regularization_method == RegularizationMethod.Robust:
         optimal_c = _gridsearch_over_parameters(
             parameter_settings=robust.generate_c_searchspace(c),
             evaluate_on_split=robust.evaluate_c_on_split,
-            X=X,
-            Y=Y,
+            X=X_array,
+            Y=Y_array,
             reg_context=context,
         )
         if verbose:
             print("Optimal c for Robust Regularization:", optimal_c)
         return robust.train_model_with_robust(
             c=optimal_c,
-            X=X,
-            Y=Y,
+            X=X_array,
+            Y=Y_array,
             reg_context=context,
         )
     else:
@@ -123,7 +121,7 @@ def _validate_inputs(
     if regularization_method == RegularizationMethod.Robust and c is None:
         raise ValueError("For the Robust regularization method,"
             "the vector of column bounds `c` is a required input.")
-    
+
 
 ParamSetting = t.TypeVar("ParamSetting")
 def _gridsearch_over_parameters(
