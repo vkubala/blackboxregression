@@ -89,23 +89,24 @@ def generate_perturbation_matrices(
     #  Generate N(0,10) iid RV's for few randomly selected rows 
     num_nonzero = int(np.ceil(0.05 * X_train.shape[0]))
     
-    num_second_set = num_to_generate - num_first_set
-    for _ in range(num_second_set):
-        perturbation_matrix = np.zeros_like(X_train)
-        
-        for j in range(X_train.shape[1]):
-            perturbation = np.zeros(X_train.shape[0])
-            
-            #  Randomly select outlier rows.
-            nonzero_indices = np.random.choice(X_train.shape[0], num_nonzero, replace=False)
-            perturbation[nonzero_indices] = np.random.normal(0, 10, num_nonzero)
-            norm = np.linalg.norm(perturbation)
-            
-            #  Normalization to satisfy <c_j ineq. column-wise.
-            if norm > c[j]:
-                perturbation *= c[j] / norm
-            perturbation_matrix[:, j] = perturbation
-        perturbation_matrices.append(perturbation_matrix)
+    if np.linalg.norm(c) != 0:
+      num_second_set = num_to_generate - num_first_set
+      for _ in range(num_second_set):
+          perturbation_matrix = np.zeros_like(X_train)
+
+          for j in range(X_train.shape[1]):
+              perturbation = np.zeros(X_train.shape[0])
+
+              #  Randomly select outlier rows.
+              nonzero_indices = np.random.choice(X_train.shape[0], num_nonzero, replace=False)
+              perturbation[nonzero_indices] = np.random.normal(0, 10, num_nonzero)
+              norm = np.linalg.norm(perturbation)
+
+              #  Normalization to satisfy <c_j ineq. column-wise.
+              if norm > c[j]:
+                  perturbation *= c[j] / norm
+              perturbation_matrix[:, j] = perturbation
+          perturbation_matrices.append(perturbation_matrix)
     
     return perturbation_matrices
 
@@ -126,7 +127,6 @@ def generate_c_searchspace(
     #  Proportional to the relative size of the bounds
     #  (larger bounds need finer grid)
     rho = np.ceil(4 * p * (c / c_l1)).astype(int)
-
 
     # Generate points for each c_i using list comprehension
     search_points = []
