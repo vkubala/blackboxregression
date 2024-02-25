@@ -127,6 +127,7 @@ def generate_c_searchspace(
     #  Proportional to the relative size of the bounds
     #  (larger bounds need finer grid)
     rho = np.ceil(4 * p * (c / c_l1)).astype(int)
+    rho_2 = np.where(rho == 0, 1, rho) #for counting combinations, 0 gets replaced by 1
 
     # Generate points for each c_i using list comprehension
     search_points = []
@@ -143,7 +144,7 @@ def generate_c_searchspace(
             search_points.append(points)
 
     # Size of the potential searchspace
-    combinations_num = np.prod(rho)
+    combinations_num = np.prod(rho_2)
 
     # Limiting the searchspace
     gridsize = min(grid_size_max, combinations_num)
