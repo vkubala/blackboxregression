@@ -54,7 +54,7 @@ def train_model_with_noise(
     X_train_all = []
     Y_train_all = []
     for _ in range(reg_context.M):              
-        noise = generate_noise(distribution, standard_deviation, X_train_noise.shape)   
+        noise = generate_noise(distribution, standard_deviation, X.shape)   
         X_train_noise = X + noise
         X_train_all.append(X_train_noise)
         Y_train_all.append(Y)     
