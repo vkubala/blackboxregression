@@ -22,9 +22,31 @@ def black_box_regress(
         c: t.Optional[npt.ArrayLike] = None,
         verbose: bool = False,
 ) -> Predictor:
-    """TODO: We're going to need a large docstring here,
-    in the proper format so that it can be converted automatically
-    to Python documentation."""
+    """Produce a model using the given regularization technique.
+
+    For more information on the types here, see `common.py`.
+    
+    :param learning_alg: the base learning algorithm
+    :param X: the design matrix on which to train
+    :param Y: the labels on which to train
+    :param regularization_method: the regularization method to use.
+        This should be one of the supported options (see RegularizationMethod in common)
+        and can be passed in as a string.
+    :param eval_criterion: the loss function on which to evaluate the model
+        during cross-validation.
+        This should be one of the supported options (see EvalCriterion in common)
+        and can be passed in as a string.
+    :param K: The number of folds to use for cross-validation.
+    :param M: The number of Monte Carlo replicates to be used. This is required for
+        Dropout and NoiseAddition regularization.
+    :param c: A vector of column bounds, required for Robust regularization.
+    :param verbose: If this is set to true, then this function will print out the
+        parameter setting that was selected during CV.
+    
+    :returns: A model that takes in new data and outputs predictions. This model
+        is trained by `learning_alg`, on data that are modified by the given
+        regularization method that was deemed the best during cross-validation.
+    """
     X_array = np.asarray(X)
     Y_array = np.asarray(Y)
     _validate_inputs(X_array, Y_array, regularization_method, M, c)
